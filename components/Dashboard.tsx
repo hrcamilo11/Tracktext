@@ -512,7 +512,7 @@ export default function TextileDashboard() {
         Object.entries(newOrder.subtasks)
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .filter(([_, isSelected]) => isSelected)
-          .map(([key]) => [key, { completed: 0 }])
+          .map(([key]) => [key, { completed: 0, percentage: 0 }])
       ),
     };
     // @ts-expect-error : orders filter
@@ -530,28 +530,28 @@ export default function TextileDashboard() {
   };
 
   const handleSubtaskUpdate = (orderId: number, subtask: string, completed: string) => {
-    const updatedOrders = orders.map(order => {
-      if (order.id === orderId) {
-        return {
-          ...order,
-          progress: {
-            ...order.progress,
-            [subtask]: {
-              completed: parseInt(completed, 10),
-              percentage: (parseInt(completed, 10) / order.quantity) * 100
-            }
+  const updatedOrders = orders.map(order => {
+    // @ts-expect-error: subtask order
+    if (order.id === orderId && order.progress[subtask]) {
+      return {
+        ...order,
+        progress: {
+          ...order.progress,
+          [subtask]: {
+            completed: parseInt(completed, 10),
+            percentage: (parseInt(completed, 10) / order.quantity) * 100
           }
         }
-      }
-      return order
-    })
-    setOrders(updatedOrders)
-    setFilteredOrders(updatedOrders)
-    if (selectedOrder && selectedOrder.id === orderId) {
-      // @ts-expect-error: Ignorar error de TypeScript
-      setSelectedOrder(updatedOrders.find(order => order.id === orderId))
+      };
     }
+    return order;
+  });
+  setOrders(updatedOrders);
+  setFilteredOrders(updatedOrders);
+  if (selectedOrder && selectedOrder.id === orderId) {
+    setSelectedOrder(updatedOrders.find(order => order.id === orderId) || null);
   }
+};
 
   const handleMarkAsDelivered = (orderId: number) => {
     const orderToDeliver = orders.find(order => order.id === orderId)
@@ -1107,7 +1107,7 @@ export default function TextileDashboard() {
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="grid gap-4 py-4">
-                                {subtasks.map((subtask) => (
+                               {subtasks.map((subtask) => (
                                   <div key={subtask} className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor={`${order.id}-${subtask}`} className="text-right">
                                       {subtask}
@@ -1116,11 +1116,13 @@ export default function TextileDashboard() {
                                       id={`${order.id}-${subtask}`}
                                       type="number"
                                       className="col-span-3"
-                                      // @ts-expect-error: Ignorar error de TypeScript
-                                      value={order.progress[subtask].completed}
+                                      // @ts-expect-error: new subtask
+                                      value={order.progress[subtask]?.completed ?? 0}
                                       onChange={(e) => handleSubtaskUpdate(order.id, subtask, e.target.value)}
                                       min={0}
                                       max={order.quantity}
+                                      // @ts-expect-error: disabled subtask
+                                      disabled={!order.progress[subtask]}
                                     />
                                   </div>
                                 ))}
