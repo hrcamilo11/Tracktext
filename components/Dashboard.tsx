@@ -439,6 +439,10 @@ export default function TextileDashboard() {
 };
 
   const handleNewClientSubmit = () => {
+    if (users.some(u => u.username === newClient.username)) {
+      toast.error("El nombre de usuario ya existe. Por favor, elija otro.")
+      return
+    }
     const newId = users.length + 1
     const newClientUser: User = {
       id: newId,
@@ -458,6 +462,10 @@ export default function TextileDashboard() {
 };
 
   const handleNewEmployeeSubmit = () => {
+    if (users.some(u => u.username === newEmployee.username)) {
+      toast.error("El nombre de usuario ya existe. Por favor, elija otro.")
+      return
+    }
     const newId = users.length + 1
     const newEmployeeUser: User = {
       id: newId,
@@ -512,7 +520,7 @@ export default function TextileDashboard() {
         Object.entries(newOrder.subtasks)
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
           .filter(([_, isSelected]) => isSelected)
-          .map(([key]) => [key, { completed: 0 }])
+          .map(([key]) => [key, { completed: 0, percentage: 0 }])
       ),
     };
     // @ts-expect-error : orders filter
@@ -530,28 +538,28 @@ export default function TextileDashboard() {
   };
 
   const handleSubtaskUpdate = (orderId: number, subtask: string, completed: string) => {
-    const updatedOrders = orders.map(order => {
-      if (order.id === orderId) {
-        return {
-          ...order,
-          progress: {
-            ...order.progress,
-            [subtask]: {
-              completed: parseInt(completed, 10),
-              percentage: (parseInt(completed, 10) / order.quantity) * 100
-            }
+  const updatedOrders = orders.map(order => {
+    // @ts-expect-error: subtask order
+    if (order.id === orderId && order.progress[subtask]) {
+      return {
+        ...order,
+        progress: {
+          ...order.progress,
+          [subtask]: {
+            completed: parseInt(completed, 10),
+            percentage: (parseInt(completed, 10) / order.quantity) * 100
           }
         }
-      }
-      return order
-    })
-    setOrders(updatedOrders)
-    setFilteredOrders(updatedOrders)
-    if (selectedOrder && selectedOrder.id === orderId) {
-      // @ts-expect-error: Ignorar error de TypeScript
-      setSelectedOrder(updatedOrders.find(order => order.id === orderId))
+      };
     }
+    return order;
+  });
+  setOrders(updatedOrders);
+  setFilteredOrders(updatedOrders);
+  if (selectedOrder && selectedOrder.id === orderId) {
+    setSelectedOrder(updatedOrders.find(order => order.id === orderId) || null);
   }
+};
 
   const handleMarkAsDelivered = (orderId: number) => {
     const orderToDeliver = orders.find(order => order.id === orderId)
@@ -807,68 +815,41 @@ export default function TextileDashboard() {
               </Card>
 
               {/* Detalles del pedido seleccionado */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Detalles del Pedido</CardTitle>
-                  <CardDescription>Información detallada del pedido seleccionado</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  {selectedOrder ? (
-                    <div className="space-y-4">
-                      <div>
-                        <Label>ID del Pedido</Label>
-                        <div className="font-medium">{selectedOrder.id}</div>
-                      </div>
-                      <div>
-                        <Label>Cliente</Label>
-                        <div className="font-medium">{selectedOrder.client || "Sin asignar"}</div>
-                      </div>
-                      <div>
-                        <Label>Producto</Label>
-                        <div className="font-medium">{selectedOrder.product}</div>
-                      </div>
-                      <div>
-                        <Label>Cantidad</Label>
-                        <div className="font-medium">{selectedOrder.quantity}</div>
-                      </div>
-                      <div>
-                        <Label>Estado</Label>
-                        <Badge className={getStatusColor(selectedOrder.status)}>{selectedOrder.status}</Badge>
-                      </div>
-                      <div>
-                        <Label>Fecha de Entrega</Label>
-                        <div className="font-medium flex items-center">
-                          <CalendarDays className="mr-2 h-4 w-4" />
-                          {formatDate(selectedOrder.dueDate)}
-                        </div>
-                      </div>
-                      <div>
-                        <Label>Progreso del Pedido</Label>
-                        <div className="space-y-2 mt-2">
-                          {subtasks.map((subtask) => (
-                            <div key={subtask} className="space-y-1">
-                              <div className="flex justify-between items-center">
-                                <span className="text-sm font-medium">{subtask}</span>
-                                <span className="text-sm text-muted-foreground">
-                                  {selectedOrder.progress[subtask].completed} / {selectedOrder.quantity}
-                                </span>
-                              </div>
-                              <Progress
-                                value={(selectedOrder.progress[subtask].completed / selectedOrder.quantity) * 100}
-                                className="h-2"
-                              />
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Detalles del Pedido</CardTitle>
+                        <CardDescription>Información detallada del pedido seleccionado</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {selectedOrder ? (
+                            <div className="space-y-4">
+                                <div>
+                                    <Label>Progreso del Pedido</Label>
+                                    <div className="space-y-2 mt-2">
+                                        {subtasks.map((subtask) => (
+                                            <div key={subtask} className="space-y-1">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-sm font-medium">{subtask}</span>
+                                                    <span className="text-sm text-muted-foreground">
+                                {selectedOrder.progress[subtask]?.completed || 0} / {selectedOrder.quantity}
+                              </span>
+                                                </div>
+                                                <Progress
+                                                    value={((selectedOrder.progress[subtask]?.completed || 0) / selectedOrder.quantity) * 100}
+                                                    className="h-2"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="text-center text-muted-foreground">
-                      Seleccione un pedido para ver sus detalles
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
+                        ) : (
+                            <div className="text-center text-muted-foreground">
+                                Seleccione un pedido para ver sus detalles
+                            </div>
+                        )}
+                    </CardContent>
+                </Card>
             </div>
           </>
         )}
@@ -1107,7 +1088,7 @@ export default function TextileDashboard() {
                                 </DialogDescription>
                               </DialogHeader>
                               <div className="grid gap-4 py-4">
-                                {subtasks.map((subtask) => (
+                               {subtasks.map((subtask) => (
                                   <div key={subtask} className="grid grid-cols-4 items-center gap-4">
                                     <Label htmlFor={`${order.id}-${subtask}`} className="text-right">
                                       {subtask}
@@ -1116,11 +1097,13 @@ export default function TextileDashboard() {
                                       id={`${order.id}-${subtask}`}
                                       type="number"
                                       className="col-span-3"
-                                      // @ts-expect-error: Ignorar error de TypeScript
-                                      value={order.progress[subtask].completed}
+                                      // @ts-expect-error: new subtask
+                                      value={order.progress[subtask]?.completed ?? 0}
                                       onChange={(e) => handleSubtaskUpdate(order.id, subtask, e.target.value)}
                                       min={0}
                                       max={order.quantity}
+                                      // @ts-expect-error: disabled subtask
+                                      disabled={!order.progress[subtask]}
                                     />
                                   </div>
                                 ))}
