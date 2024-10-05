@@ -303,11 +303,11 @@ export default function TextileDashboard() {
   const [newClient, setNewClient] = useState<NewClient>({ username: '', password: '' });
   const [newEmployee, setNewEmployee] = useState<NewEmployee>({ username: '', password: '' });
   const [newOrder, setNewOrder] = useState<NewOrder>({
-  product: '',
-  quantity: '',
-  dueDate: '',
-  subtasks: {},
-});
+    product: '',
+    quantity: '',
+    dueDate: '',
+    subtasks: {},
+  });
   const [deliveredOrders, setDeliveredOrders] = useState<DeliveredOrder[]>([]);
   const [showPasswords, setShowPasswords] = useState<{ [key: number]: boolean }>({})
   const [notifications, setNotifications] = useState<Notification[]>([])
@@ -483,27 +483,26 @@ export default function TextileDashboard() {
 };
 
   const handleSubtaskToggle = (subtask: string) => {
-
     setNewOrder({
       ...newOrder,
       subtasks: {
         ...newOrder.subtasks,
         [subtask]: !newOrder.subtasks[subtask],
       },
-    })
-  }
+    });
+  };
 
   const handleNewOrderSubmit = () => {
-    const today = new Date()
-    const dueDate = new Date(newOrder.dueDate)
+    const today = new Date();
+    const dueDate = new Date(newOrder.dueDate);
 
     if (dueDate < today) {
-      toast.error("Error al crear pedido")
-      toast.info("La fecha de entrega no puede ser anterior a la fecha actual.")
-      return
+      toast.error("Error al crear pedido");
+      toast.info("La fecha de entrega no puede ser anterior a la fecha actual.");
+      return;
     }
 
-    const newId = orders.length + 1
+    const newId = orders.length + 1;
     const newOrderWithId = {
       ...newOrder,
       id: newId,
@@ -511,22 +510,24 @@ export default function TextileDashboard() {
       status: "Pendiente",
       progress: Object.fromEntries(
         Object.entries(newOrder.subtasks)
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          .filter(([_, isSelected]) => isSelected)
           .map(([key]) => [key, { completed: 0 }])
       ),
-    }
-    // @ts-expect-error: Ignorar error de TypeScript
-    setOrders([...orders, newOrderWithId])
-    // @ts-expect-error: Ignorar error de TypeScript
-    setFilteredOrders([...orders, newOrderWithId])
+    };
+    // @ts-expect-error : orders filter
+    setOrders([...orders, newOrderWithId]);
+    // @ts-expect-error : orders filterupdate
+    setFilteredOrders([...orders, newOrderWithId]);
     setNewOrder({
       product: "",
       quantity: "",
       dueDate: "",
-      subtasks: subtasks.reduce((acc, task) => ({ ...acc, [task]: false }), {}),
-    })
-    toast.success("Pedido creado")
-    toast.info("Se ha creado un nuevo pedido exitosamente.")
-  }
+      subtasks: {},
+    });
+    toast.success("Pedido creado");
+    toast.info("Se ha creado un nuevo pedido exitosamente.");
+  };
 
   const handleSubtaskUpdate = (orderId: number, subtask: string, completed: string) => {
     const updatedOrders = orders.map(order => {
