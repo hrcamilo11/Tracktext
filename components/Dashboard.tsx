@@ -314,33 +314,31 @@ export default function TextileDashboard() {
 
 
 
-  // @ts-expect-error: useEfect error
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect([orders], () => {
-    // Check for delayed orders and create notifications
-    const today = new Date()
-    const delayedOrders = orders.filter(order => new Date(order.dueDate) < today && order.status !== "Completado")
-    delayedOrders.forEach(order => {
-      createNotification('order_delayed', `El pedido #${order.id} está retrasado.`)
-    })
-
-    // Check for unassigned orders in production
-    const unassignedOrders = orders.filter(order => !order.client && order.status === "En producción")
-    unassignedOrders.forEach(order => {
-      createNotification('unassigned_order', `El pedido #${order.id} está en producción pero no tiene cliente asignado.`)
-    })
+  useEffect(() => {
+  // Check for delayed orders and create notifications
+  const today = new Date()
+  const delayedOrders = orders.filter(order => new Date(order.dueDate) < today && order.status !== "Completado")
+  delayedOrders.forEach(order => {
+    createNotification('order_delayed', `El pedido #${order.id} está retrasado.`)
   })
 
+  // Check for unassigned orders in production
+  const unassignedOrders = orders.filter(order => !order.client && order.status === "En producción")
+  unassignedOrders.forEach(order => {
+    createNotification('unassigned_order', `El pedido #${order.id} está en producción pero no tiene cliente asignado.`)
+  })
+}, [orders])
+
   const createNotification = (type: 'password_change' | 'order_delayed' | 'unassigned_order', message: string) => {
-    const newNotification: Notification = {
-      id: notifications.length + 1,
-      type,
-      message,
-      createdAt: new Date(),
-      read: false,
-    }
-    setNotifications(prev => [...prev, newNotification])
+  const newNotification: Notification = {
+    id: notifications.length + 1,
+    type,
+    message,
+    createdAt: new Date(),
+    read: false,
   }
+  setNotifications(prev => [...prev, newNotification])
+}
 
   const handleMarkNotificationAsRead = (id: number) => {
     setNotifications(prev => prev.map(notif =>
