@@ -96,12 +96,12 @@ interface NewClient {
   phone: string;
 }
 
-interface NewEmployee {
-  username: string;
-  password: string;
-  email: string;
-  phone: string;
-}
+  interface NewEmployee {
+    username: string;
+    password: string;
+    email: string;
+    phone: string;
+  }
 
 const subtasks = ['Cortado', 'Bordado', 'Cosido', 'Armado', 'Control de calidad', 'Empaquetado']
 
