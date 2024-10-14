@@ -21,6 +21,7 @@
     "@radix-ui/react-tabs": "^1.1.0",
     "@radix-ui/react-toast": "^1.2.2",
     "@types/lodash": "^4.17.9",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^2.4.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
@@ -31,7 +32,7 @@
     "jsonwebtoken": "^9.0.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.446.0",
-    "mongoose": "^8.7.0",
+    "mongoose": "^8.7.1",
     "multer": "^1.4.5-lts.1",
     "next": "14.2.13",
     "react": "^18",
@@ -44,6 +45,8 @@
     "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
+    "@types/bcrypt": "^5.0.2",
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
