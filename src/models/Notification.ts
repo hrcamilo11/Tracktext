@@ -1,25 +1,17 @@
-/**
- * @typedef {Object} Notification
- * @property {string} id
- * @property {string} type - 'info', 'warning', 'error', etc.
- * @property {string} message
- * @property {Date} date
- * @property {boolean} read
- */
+import { Schema, model, Document } from 'mongoose';
 
-export default class Notification {
-    /**
-     * @param {string} id
-     * @param {string} type - 'info', 'warning', 'error', etc.
-     * @param {string} message
-     * @param {Date} date
-     * @param {boolean} read
-     */
-    constructor(id, type, message, date, read) {
-      this.id = id;
-      this.type = type;
-      this.message = message;
-      this.date = date;
-      this.read = read;
-    }
-  }
+export interface INotification extends Document {
+  type: 'password_change' | 'order_delayed' | 'unassigned_order';
+  message: string;
+  createdAt: Date;
+  read: boolean;
+}
+
+const NotificationSchema = new Schema<INotification>({
+  type: { type: String, required: true, enum: ['password_change', 'order_delayed', 'unassigned_order'] },
+  message: { type: String, required: true },
+  createdAt: { type: Date, required: true, default: Date.now },
+  read: { type: Boolean, required: true, default: false },
+});
+
+export const Notification = model<INotification>('Notification', NotificationSchema);

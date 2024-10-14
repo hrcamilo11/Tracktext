@@ -1,29 +1,21 @@
-/**
- * @typedef {Object} User
- * @property {string} id
- * @property {string} username
- * @property {string} password
- * @property {string} email
- * @property {string} phone
- * @property {string} role - 'admin', 'employee', or 'client'
- */
+import { Schema, model, Document } from 'mongoose';
 
-export default class User {
-    /**
-     * @param {string} id
-     * @param {string} username
-     * @param {string} password
-     * @param {string} email
-     * @param {string} phone
-     * @param {string} role - 'admin', 'employee', or 'client'
-     */
-    constructor(id, username, password, email, phone, role) {
-      this.id = id;
-      this.username = username;
-      this.password = password;
-      this.email = email;
-      this.phone = phone;
-      this.role = role;
-    }
-  }
+export interface IUser extends Document {
+  _id: string;
+  username: string;
+  password: string;
+  email: string;
+  phone: string;
+  role: 'admin' | 'employee' | 'client';
+}
+
+const UserSchema = new Schema<IUser>({
+  username: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  phone: { type: String, required: true },
+  role: { type: String, required: true, enum: ['admin', 'employee', 'client'] },
+});
+
+export const User = model<IUser>('User', UserSchema);
   

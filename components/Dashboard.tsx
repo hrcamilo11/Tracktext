@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {AuthService} from "../src/services/AuthService"
+import { AuthRepository } from '../src/repositories/AuthRepository';
 import {
   Package,
   Scissors,
@@ -36,6 +38,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Progress } from "@/components/ui/progress"
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
+
 
 type User = {
   id: number
@@ -104,6 +107,7 @@ interface NewClient {
 
 const subtasks = ['Cortado', 'Bordado', 'Cosido', 'Armado', 'Control de calidad', 'Empaquetado']
 
+const authService = new AuthService(new AuthRepository());
 function Auth({ onLogin, onRegister, onPasswordRecovery, users }: AuthProps) {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login")
   const [username, setUsername] = useState("")
@@ -112,27 +116,59 @@ function Auth({ onLogin, onRegister, onPasswordRecovery, users }: AuthProps) {
   const [phone, setPhone] = useState("")
   const [recoveryUsername, setRecoveryUsername] = useState("")
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault()
-    const user = users.find(u => u.username === username && u.password === password)
-    if (user) {
-      onLogin(user)
-      toast.dark("Bienvenido " + user.username)
-    } else {
-      toast.error("Por favor, verifica tu nombre de usuario y contraseña.")
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+  
+      const data = await response.json();
+      const token = data.token;
+      toast.success('Inicio de sesión exitoso');
+      // Guardar el token en el almacenamiento local o en el estado de la aplicación
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An unknown error occurred');
+      }
     }
-  }
+  };
 
-  const handleRegister = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (users.some(u => u.username === username)) {
-      toast.error("El nombre de usuario ya existe. Por favor, elija otro.")
-    } else {
-      onRegister(username, password, email, phone)
-      setActiveTab("login")
-      toast.success("Por favor, inicie sesión con sus nuevas credenciales.")
+  const handleRegister = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password, email, phone, role: 'client' }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Registration failed');
+      }
+  
+      toast.success('Registro exitoso');
+      setActiveTab('login');
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error('An unknown error occurred');
+      }
     }
-  }
+  };
 
   const handlePasswordRecovery = (e: React.FormEvent) => {
     e.preventDefault()

@@ -1,31 +1,27 @@
-/**
- * @typedef {Object} Order
- * @property {string} id
- * @property {Client} client
- * @property {Product} product
- * @property {number} quantity
- * @property {Date} dueDate
- * @property {string} status
- * @property {Object} progress
- */
+import { Schema, model, Document } from 'mongoose';
 
-export default class Order {
-    /**
-     * @param {string} id
-     * @param {Client} client
-     * @param {Product} product
-     * @param {number} quantity
-     * @param {Date} dueDate
-     * @param {string} status
-     * @param {Object} progress
-     */
-    constructor(id, client, product, quantity, dueDate, status, progress) {
-      this.id = id;
-      this.client = client;
-      this.product = product;
-      this.quantity = quantity;
-      this.dueDate = dueDate;
-      this.status = status;
-      this.progress = progress; // Object with dynamic keys
-    }
-  }
+export interface IOrder extends Document {
+  client: string;
+  product: string;
+  quantity: number;
+  dueDate: string;
+  status: string;
+  progress: { [key: string]: { completed: number } };
+}
+
+const OrderSchema = new Schema<IOrder>({
+  client: { type: String, required: true },
+  product: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  dueDate: { type: String, required: true },
+  status: { type: String, required: true },
+  progress: { 
+    type: Map, 
+    of: new Schema({
+      completed: { type: Number, required: true }
+    }), 
+    required: true 
+  },
+});
+
+export const Order = model<IOrder>('Order', OrderSchema);
