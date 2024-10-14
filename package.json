@@ -2,8 +2,11 @@
   "name": "upblioteca",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
-    "dev": "next dev",
+    "dev": "concurrently \"npm run dev:next\" \"npm run dev:express\"",
+    "dev:next": "next dev",
+    "dev:express": "ts-node-esm ./server.ts",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -51,10 +54,14 @@
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "concurrently": "^9.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "ts-loader": "^9.5.1",
+    "ts-node": "^10.9.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.6.3"
   }
 }

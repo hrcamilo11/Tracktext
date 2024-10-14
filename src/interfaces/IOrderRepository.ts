@@ -1,4 +1,4 @@
-import { IOrder } from '../models/Order';
+import { IOrder } from '../models/Order.ts';
 
 export interface IOrderRepository {
   getAll(): Promise<IOrder[]>;

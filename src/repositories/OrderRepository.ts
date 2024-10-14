@@ -1,5 +1,5 @@
-import { IOrderRepository } from '../interfaces/IOrderRepository';
-import { Order, IOrder } from '../models/Order';
+import { IOrderRepository } from '../interfaces/IOrderRepository.ts';
+import { Order, IOrder } from '../models/Order.ts';
 
 export class OrderRepository implements IOrderRepository {
   async getAll(): Promise<IOrder[]> {

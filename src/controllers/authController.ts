@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import { AuthService } from '../services/AuthService';
-import { User } from '../models/User';
+import { AuthService } from '../services/AuthService.ts';
+import { User } from '../models/User.ts';
 
 const authService = new AuthService({
   findByUsername: async (username: string) => User.findOne({ username }),

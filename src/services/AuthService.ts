@@ -1,5 +1,5 @@
-import { IAuthRepository } from '../interfaces/IAuthRepository';
-import { IUser, User } from '../models/User';
+import { IAuthRepository } from '../interfaces/IAuthRepository.ts';
+import { IUser, User } from '../models/User.ts';
 import bcrypt from 'bcryptjs';
 
 import jwt from 'jsonwebtoken';

@@ -1,6 +1,6 @@
-import { IAuthRepository } from '../interfaces/IAuthRepository';
-import { UserRepository } from './User_repository';
-import { User, IUser } from '../models/User';
+import { IAuthRepository } from '../interfaces/IAuthRepository.ts';
+import { UserRepository } from './User_repository.ts';
+import { User, IUser } from '../models/User.ts';
 
 export class AuthRepository implements IAuthRepository {
     private userRepository: UserRepository;
