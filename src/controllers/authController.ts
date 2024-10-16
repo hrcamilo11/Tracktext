@@ -9,9 +9,12 @@ const authService = new AuthService({
 
 export const login = async (req: Request, res: Response) => {
   const { username, password } = req.body;
+  console.log(req.body);
   try {
+    
     const token = await authService.login(username, password);
     res.json({ token });
+
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }

@@ -132,9 +132,14 @@ function Auth({ onLogin, onRegister, onPasswordRecovery, users }: AuthProps) {
       }
   
       const data = await response.json();
+
       const token = data.token;
+      // Guardar el token en el almacenamiento local
+      localStorage.setItem('authToken', token);
+
       toast.success('Inicio de sesión exitoso');
-      // Guardar el token en el almacenamiento local o en el estado de la aplicación
+      
+      
     } catch (error) {
       if (error instanceof Error) {
         toast.error(error.message);

@@ -22,7 +22,7 @@ export class AuthService {
       throw new Error('Contraseña incorrecta');
     }
 
-    const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, 'your_jwt_secret', { expiresIn: '1h' });
+    const token = jwt.sign({ id: user._id, username: user.username, role: user.role }, 'clavesita', { expiresIn: '1h' });
     return token;
   }
 
