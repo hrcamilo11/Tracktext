@@ -27,9 +27,9 @@ export class AuthService {
   }
 
   async register( username:string, password:string, email:string, phone:string, role:'admin' | 'employee' | 'client'): Promise<IUser> {
-    if (!username || !password || !email || !phone) {
-        throw new Error('No se permiten campos nulos');
-      }
+    //if (!username || !password || !email || !phone) {
+        //throw new Error('No se permiten campos nulos');
+      //}
   
       // Verificar si el usuario ya existe antes de registrarlo
       const existingUser = await this.authRepository.findByUsername(username);

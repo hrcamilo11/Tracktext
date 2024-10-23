@@ -7,8 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import {AuthService} from "../src/services/AuthService"
-import { AuthRepository } from '../src/repositories/AuthRepository';
+
 import {
   Package,
   Scissors,
@@ -107,7 +106,7 @@ interface NewClient {
 
 const subtasks = ['Cortado', 'Bordado', 'Cosido', 'Armado', 'Control de calidad', 'Empaquetado']
 
-const authService = new AuthService(new AuthRepository());
+
 function Auth({ onLogin, onRegister, onPasswordRecovery, users }: AuthProps) {
   const [activeTab, setActiveTab] = useState<"login" | "register">("login")
   const [username, setUsername] = useState("")
