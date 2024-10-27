@@ -33,4 +33,15 @@ export const register = async (req: Request, res: Response) => {
   } catch (error) {
     res.status(400).json({ error: (error as Error).message });
   }
+  
+};
+
+export const validateToken = async (req: Request, res: Response) => {
+  const token = req.body.token;
+  try {
+    const user = await authService.validateToken(token);
+    res.json({ user });
+  } catch (error) {
+    res.status(400).json({ error: (error as Error).message });
+  }
 };

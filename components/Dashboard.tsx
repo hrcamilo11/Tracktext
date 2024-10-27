@@ -7,6 +7,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import jwtDecode from 'jwt-decode';
+
 
 import {
   Package,
@@ -131,10 +133,14 @@ function Auth({ onLogin, onRegister, onPasswordRecovery, users }: AuthProps) {
       }
   
       const data = await response.json();
-
       const token = data.token;
-      // Guardar el token en el almacenamiento local
       localStorage.setItem('authToken', token);
+      const user: User = { id: data.id, username: data.username, password: 'null', email: data.email, phone: data.phone, role: data.role };
+      await onLogin(user)
+      
+      
+      // Guardar el token en el almacenamiento local
+      
 
       toast.success('Inicio de sesión exitoso');
       
@@ -147,6 +153,7 @@ function Auth({ onLogin, onRegister, onPasswordRecovery, users }: AuthProps) {
       }
     }
   };
+  
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -394,9 +401,27 @@ export default function TextileDashboard() {
     }
   }
 
-  const handleLogin = (loggedInUser: User) => {
-    setUser(loggedInUser)
-    setActiveSection("pedidos")
+  const handleLogin = async() => {
+    console.log('entró al segundo login');
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      const response = await fetch('http://localhost:5000/api/auth/validateToken', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Login failed');
+      }
+     const data = await response.json();
+     toast.dark("Bienvenido " + data.user.username); 
+      setUser(data.user);
+  
+    setActiveSection("pedidos");
+  }
   }
 
   const handleRegister = (username: string, password: string, email: string, phone: string) => {

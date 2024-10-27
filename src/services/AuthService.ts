@@ -27,9 +27,9 @@ export class AuthService {
   }
 
   async register( username:string, password:string, email:string, phone:string, role:'admin' | 'employee' | 'client'): Promise<IUser> {
-    //if (!username || !password || !email || !phone) {
-        //throw new Error('No se permiten campos nulos');
-      //}
+    if (!username || !password || !email || !phone) {
+        throw new Error('No se permiten campos nulos');
+      }
   
       // Verificar si el usuario ya existe antes de registrarlo
       const existingUser = await this.authRepository.findByUsername(username);
@@ -48,7 +48,21 @@ export class AuthService {
         phone,
         role,
       });
+      
   
     return await this.authRepository.createUser(user);
   }
+  async validateToken(token: string) {
+    try {
+      const decoded = jwt.verify(token, 'clavesita') as { id: string };
+      const user = await this.authRepository.findById(decoded.id);
+      if (!user) {
+        throw new Error('Usuario no encontrado');
+      }
+      return user;
+    } catch (error) {
+      throw new Error('Token inválido');
+  }
+}
+  
 }
