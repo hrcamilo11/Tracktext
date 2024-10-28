@@ -42,7 +42,7 @@ import 'react-toastify/dist/ReactToastify.css'
 
 
 type User = {
-  id: string
+  _id: string
   username: string
   password: string
   email: string
@@ -51,7 +51,7 @@ type User = {
 }
 
 type Notification = {
-  id: number
+  _id: number
   type: 'password_change' | 'order_delayed' | 'unassigned_order'
   message: string
   createdAt: Date
@@ -66,7 +66,7 @@ type AuthProps = {
 }
 
 interface Order {
-  id: number;
+  _id: string;
   client: string;
   product: string;
   quantity: number;
@@ -136,7 +136,7 @@ function Auth({ onLogin, onRegister, onPasswordRecovery, users }: AuthProps) {
       const token = data.token;
       // Guardar el token en el almacenamiento local
       localStorage.setItem('authToken', token);
-      const user: User = { id: data.id, username: data.username, password: 'null', email: data.email, phone: data.phone, role: data.role };
+      const user: User = { _id: data.id, username: data.username, password: 'null', email: data.email, phone: data.phone, role: data.role };
       //al llamar a la función onLogin, se verifica el token y se guarda el usuario en el estado
       await onLogin(user)
       toast.success('Inicio de sesión exitoso');
@@ -291,7 +291,7 @@ function Notifications({ notifications, onMarkAsRead }: { notifications: Notific
         ) : (
           <ul className="space-y-4">
             {notifications.map((notification) => (
-              <li key={notification.id} className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
+              <li key={notification._id} className="flex items-center justify-between p-4 bg-gray-100 rounded-lg">
                 <div>
                   <p className="font-medium">{notification.message}</p>
                   <p className="text-sm text-gray-500">
@@ -299,7 +299,7 @@ function Notifications({ notifications, onMarkAsRead }: { notifications: Notific
                   </p>
                 </div>
                 {!notification.read && (
-                  <Button onClick={() => onMarkAsRead(notification.id)}>
+                  <Button onClick={() => onMarkAsRead(notification._id)}>
                     Marcar como leída
                   </Button>
                 )}
@@ -316,14 +316,12 @@ export default function TextileDashboard() {
 
   const [user, setUser] = useState<User | null>(null)
   const [users, setUsers] = useState<User[]>([]);
-  useEffect(() => {
-    handlelistclients();
-  }, []);
+
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeSection, setActiveSection] = useState("pedidos")
   const [orders, setOrders] = useState<Order[]>([
     {
-      id: 1,
+      _id: ""+1,
       client: "client",
       product: "Vestidos",
       quantity: 75,
@@ -350,25 +348,25 @@ export default function TextileDashboard() {
     subtasks: {},
   });
   const [deliveredOrders, setDeliveredOrders] = useState<DeliveredOrder[]>([]);
-  const [showPasswords, setShowPasswords] = useState<{ [key: number]: boolean }>({})
+  const [showPasswords, setShowPasswords] = useState<{ [key: string]: boolean }>({})
   const [notifications, setNotifications] = useState<Notification[]>([])
 
   useEffect(() => {
     const today = new Date()
     const delayedOrders = orders.filter(order => new Date(order.dueDate) < today && order.status !== "Completado")
     delayedOrders.forEach(order => {
-      createNotification('order_delayed', `El pedido #${order.id} está retrasado.`)
+      createNotification('order_delayed', `El pedido #${order._id} está retrasado.`)
     })
 
     const unassignedOrders = orders.filter(order => !order.client && order.status === "En producción")
     unassignedOrders.forEach(order => {
-      createNotification('unassigned_order', `El pedido #${order.id} está en producción pero no tiene cliente asignado.`)
+      createNotification('unassigned_order', `El pedido #${order._id} está en producción pero no tiene cliente asignado.`)
     })
   }, [orders])
 
   const createNotification = (type: 'password_change' | 'order_delayed' | 'unassigned_order', message: string) => {
     const newNotification: Notification = {
-      id: notifications.length + 1,
+      _id: notifications.length + 1,
       type,
       message,
       createdAt: new Date(),
@@ -379,7 +377,7 @@ export default function TextileDashboard() {
 
   const handleMarkNotificationAsRead = (id: number) => {
     setNotifications(prev => prev.map(notif =>
-      notif.id === id ? { ...notif, read: true } : notif
+      notif._id === id ? { ...notif, read: true } : notif
     ))
   }
 
@@ -442,12 +440,13 @@ export default function TextileDashboard() {
       setUser(data.user);
 
       setActiveSection("pedidos");
+      handlelistclients();
     }
   }
 
   const handleRegister = (username: string, password: string, email: string, phone: string) => {
     const newUser: User = {
-      id: "" + users.length + 1,
+      _id: "" + users.length + 1,
       username,
       password,
       email,
@@ -483,13 +482,13 @@ export default function TextileDashboard() {
     setSelectedOrder(order);
   };
 
-  const handleStatusUpdate = (orderId: number, newStatus: string) => {
+  const handleStatusUpdate = (orderId: string, newStatus: string) => {
     const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, status: newStatus } : order
+      order._id === orderId ? { ...order, status: newStatus } : order
     )
     setOrders(updatedOrders)
     setFilteredOrders(updatedOrders)
-    if (selectedOrder && selectedOrder.id === orderId) {
+    if (selectedOrder && selectedOrder._id === orderId) {
       setSelectedOrder({ ...selectedOrder, status: newStatus })
     }
   }
@@ -500,7 +499,7 @@ export default function TextileDashboard() {
     const filtered = orders.filter(order =>
       (order.client?.toLowerCase().includes(term) || '') ||
       order.product.toLowerCase().includes(term) ||
-      order.id.toString().includes(term)
+      order._id.toString().includes(term)
     )
     setFilteredOrders(filtered)
   }
@@ -526,7 +525,7 @@ export default function TextileDashboard() {
     }
     const newId = users.length + 1
     const newClientUser: User = {
-      id: ""+newId,
+      _id: ""+newId,
       username: newClient.username,
       password: newClient.password,
       email: newClient.email,
@@ -564,7 +563,7 @@ export default function TextileDashboard() {
     }
     const newId = users.length + 1
     const newEmployeeUser: User = {
-      id: newId,
+      _id: ""+ newId,
       username: newEmployee.username,
       password: newEmployee.password,
       email: newEmployee.email,
@@ -589,14 +588,14 @@ export default function TextileDashboard() {
     toast.info("Se ha creado un nuevo empleado exitosamente.")
   }
 
-  const handleEmployeeDelete = (employeeId: number) => {
-    setUsers(users.filter(user => user.id !== employeeId || user.role !== "employee"))
+  const handleEmployeeDelete = (employeeId: string) => {
+    setUsers(users.filter(user => user._id !== employeeId || user.role !== "employee"))
     toast.warning("Empleado eliminado")
     toast.info("Se ha eliminado el empleado exitosamente.")
   }
 
-  const handleClientDelete = (clientId: number) => {
-    setUsers(users.filter(user => user.id !== clientId || user.role !== "client"))
+  const handleClientDelete = (clientId: string) => {
+    setUsers(users.filter(user => user._id !== clientId || user.role !== "client"))
     toast.warning("Cliente eliminado")
     toast.info("Se ha eliminado el cliente exitosamente.")
   }
@@ -628,7 +627,7 @@ export default function TextileDashboard() {
 
     const newId = orders.length + 1;
     const newOrderWithId: Order = {
-      id: newId,
+      _id: "" + newId,
       client: user?.role === 'client' ? user.username : '',
       product: newOrder.product,
       quantity: parseInt(newOrder.quantity),
@@ -653,9 +652,9 @@ export default function TextileDashboard() {
     toast.info("Se ha creado un nuevo pedido exitosamente.");
   };
 
-  const handleSubtaskUpdate = (orderId: number, subtask: string, completed: string) => {
+  const handleSubtaskUpdate = (orderId: string, subtask: string, completed: string) => {
     const updatedOrders = orders.map(order => {
-      if (order.id === orderId && order.progress[subtask]) {
+      if (order._id === orderId && order.progress[subtask]) {
         return {
           ...order,
           progress: {
@@ -670,17 +669,17 @@ export default function TextileDashboard() {
     });
     setOrders(updatedOrders);
     setFilteredOrders(updatedOrders);
-    if (selectedOrder && selectedOrder.id === orderId) {
-      setSelectedOrder(updatedOrders.find(order => order.id === orderId) || null);
+    if (selectedOrder && selectedOrder._id === orderId) {
+      setSelectedOrder(updatedOrders.find(order => order._id === orderId) || null);
     }
   };
 
-  const handleMarkAsDelivered = (orderId: number) => {
-    const orderToDeliver = orders.find(order => order.id === orderId)
+  const handleMarkAsDelivered = (orderId: string) => {
+    const orderToDeliver = orders.find(order => order._id === orderId)
     if (orderToDeliver) {
       const updatedOrder: DeliveredOrder = { ...orderToDeliver, status: "Entregado", deliveredDate: new Date().toISOString() }
       setDeliveredOrders([...deliveredOrders, updatedOrder])
-      const updatedOrders = orders.filter(order => order.id !== orderId)
+      const updatedOrders = orders.filter(order => order._id !== orderId)
       setOrders(updatedOrders)
       setFilteredOrders(updatedOrders)
 
@@ -689,13 +688,13 @@ export default function TextileDashboard() {
     }
   }
 
-  const togglePasswordVisibility = (id: number) => {
+  const togglePasswordVisibility = (id: string) => {
     setShowPasswords(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
-  const handleAssignOrder = (clientId: number, orderId: number) => {
+  const handleAssignOrder = (clientId: string, orderId: string) => {
     const updatedOrders = orders.map(order =>
-      order.id === orderId ? { ...order, client: users.find(u => u.id === clientId)?.username || '' } : order
+      order._id === orderId ? { ...order, client: users.find(u => u._id === clientId)?.username || '' } : order
     )
     setOrders(updatedOrders)
     setFilteredOrders(updatedOrders)
@@ -903,11 +902,11 @@ export default function TextileDashboard() {
                       <tbody>
                         {filteredOrders.filter(order => user.role === 'client' ? order.client === user.username : true).map((order) => (
                           <tr
-                            key={order.id}
+                            key={order._id}
                             className="cursor-pointer hover:bg-gray-100"
                             onClick={() => handleOrderSelect(order)}
                           >
-                            <td className="p-2">{order.id}</td>
+                            <td className="p-2">{order._id}</td>
                             <td className="p-2">{order.client || "Sin asignar"}</td>
                             <td className="p-2">{order.product}</td>
                             <td className="p-2">
@@ -1039,15 +1038,15 @@ export default function TextileDashboard() {
                   </thead>
                   <tbody>
                     {users.filter(u => u.role === 'client').map((client) => (
-                      <tr key={client.id}>
-                        <td className="p-2">{client.id}</td>
+                      <tr key={client._id}>
+                        <td className="p-2">{client._id}</td>
                         <td className="p-2">{client.username}</td>
                         <td className="p-2">{client.email}</td>
                         <td className="p-2">{client.phone}</td>
                         <td className="p-2">
                           <div className="flex items-center space-x-2">
                             <Input
-                              type={showPasswords[client.id] ? "text" : "password"}
+                              type={showPasswords[client._id] ? "text" : "password"}
                               value={client.password}
                               readOnly
                               className="w-40"
@@ -1055,23 +1054,23 @@ export default function TextileDashboard() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => togglePasswordVisibility(client.id)}
+                              onClick={() => togglePasswordVisibility(client._id)}
                             >
-                              {showPasswords[client.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              {showPasswords[client._id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
                           </div>
                         </td>
                         <td className="p-2">
                           <Button size="sm" onClick={() => {
                             const newPassword = Math.random().toString(36).slice(-8);
-                            setUsers(users.map(u => u.id === client.id ? { ...u, password: newPassword } : u));
+                            setUsers(users.map(u => u._id === client._id ? { ...u, password: newPassword } : u));
                             toast.success("Contraseña actualizada")
                             toast.info(`Nueva contraseña para ${client.username}: ${newPassword}`);
                           }}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Nueva Contraseña
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleClientDelete(client.id)} className="ml-2">
+                          <Button size="sm" variant="destructive" onClick={() => handleClientDelete(client._id)} className="ml-2">
                             <X className="h-4 w-4 mr-2" />
                             Eliminar
                           </Button>
@@ -1089,14 +1088,14 @@ export default function TextileDashboard() {
                                   Seleccione un pedido para asignar a este cliente
                                 </DialogDescription>
                               </DialogHeader>
-                              <Select onValueChange={(value) => handleAssignOrder(client.id, parseInt(value))}>
+                              <Select onValueChange={(value) => handleAssignOrder(client._id, value)}>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Seleccione un pedido" />
                                 </SelectTrigger>
                                 <SelectContent>
                                   {orders.filter(order => !order.client).map((order) => (
-                                    <SelectItem key={order.id} value={order.id.toString()}>
-                                      Pedido #{order.id} - {order.product}
+                                    <SelectItem key={order._id} value={order._id.toString()}>
+                                      Pedido #{order._id} - {order.product}
                                     </SelectItem>
                                   ))}
                                 </SelectContent>
@@ -1203,8 +1202,8 @@ export default function TextileDashboard() {
                   </thead>
                   <tbody>
                     {orders.map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-100">
-                        <td className="p-2">{order.id}</td>
+                      <tr key={order._id} className="hover:bg-gray-100">
+                        <td className="p-2">{order._id}</td>
                         <td className="p-2">{order.client || "Sin asignar"}</td>
                         <td className="p-2">{order.product}</td>
                         <td className="p-2">{order.quantity}</td>
@@ -1219,7 +1218,7 @@ export default function TextileDashboard() {
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[425px]">
                               <DialogHeader>
-                                <DialogTitle>Progreso del Pedido #{order.id}</DialogTitle>
+                                <DialogTitle>Progreso del Pedido #{order._id}</DialogTitle>
                                 <DialogDescription>
                                   Actualice el progreso de cada subtarea
                                 </DialogDescription>
@@ -1227,15 +1226,15 @@ export default function TextileDashboard() {
                               <div className="grid gap-4 py-4">
                                 {subtasks.map((subtask) => (
                                   <div key={subtask} className="grid grid-cols-4 items-center gap-4">
-                                    <Label htmlFor={`${order.id}-${subtask}`} className="text-right">
+                                    <Label htmlFor={`${order._id}-${subtask}`} className="text-right">
                                       {subtask}
                                     </Label>
                                     <Input
-                                      id={`${order.id}-${subtask}`}
+                                      id={`${order._id}-${subtask}`}
                                       type="number"
                                       className="col-span-3"
                                       value={order.progress[subtask]?.completed ?? 0}
-                                      onChange={(e) => handleSubtaskUpdate(order.id, subtask, e.target.value)}
+                                      onChange={(e) => handleSubtaskUpdate(order._id, subtask, e.target.value)}
                                       min={0}
                                       max={order.quantity}
                                       disabled={!order.progress[subtask]}
@@ -1250,7 +1249,7 @@ export default function TextileDashboard() {
                           </Dialog>
                         </td>
                         <td className="p-2">
-                          <Select onValueChange={(value) => handleStatusUpdate(order.id, value)}>
+                          <Select onValueChange={(value) => handleStatusUpdate(order._id, value)}>
                             <SelectTrigger>
                               <SelectValue placeholder="Cambiar estado" />
                             </SelectTrigger>
@@ -1291,8 +1290,8 @@ export default function TextileDashboard() {
                   </thead>
                   <tbody>
                     {orders.filter(order => order.status === "Completado").map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-100">
-                        <td className="p-2">{order.id}</td>
+                      <tr key={order._id} className="hover:bg-gray-100">
+                        <td className="p-2">{order._id}</td>
                         <td className="p-2">{order.client || "Sin asignar"}</td>
                         <td className="p-2">{order.product}</td>
                         <td className="p-2">{order.quantity}</td>
@@ -1300,7 +1299,7 @@ export default function TextileDashboard() {
                         <td className="p-2">
                           <Button
                             size="sm"
-                            onClick={() => handleMarkAsDelivered(order.id)}
+                            onClick={() => handleMarkAsDelivered(order._id)}
                           >
                             Marcar como Entregado
                           </Button>
@@ -1335,8 +1334,8 @@ export default function TextileDashboard() {
                   </thead>
                   <tbody>
                     {deliveredOrders.filter(order => user.role === 'client' ? order.client === user.username : true).map((order) => (
-                      <tr key={order.id} className="hover:bg-gray-100">
-                        <td className="p-2">{order.id}</td>
+                      <tr key={order._id} className="hover:bg-gray-100">
+                        <td className="p-2">{order._id}</td>
                         <td className="p-2">{order.client || "Sin asignar"}</td>
                         <td className="p-2">{order.product}</td>
                         <td className="p-2">{order.quantity}</td>
@@ -1429,15 +1428,15 @@ export default function TextileDashboard() {
                   </thead>
                   <tbody>
                     {users.filter(u => u.role === 'employee').map((employee) => (
-                      <tr key={employee.id}>
-                        <td className="p-2">{employee.id}</td>
+                      <tr key={employee._id}>
+                        <td className="p-2">{employee._id}</td>
                         <td className="p-2">{employee.username}</td>
                         <td className="p-2">{employee.email}</td>
                         <td className="p-2">{employee.phone}</td>
                         <td className="p-2">
                           <div className="flex items-center space-x-2">
                             <Input
-                              type={showPasswords[employee.id] ? "text" : "password"}
+                              type={showPasswords[employee._id] ? "text" : "password"}
                               value={employee.password}
                               readOnly
                               className="w-40"
@@ -1445,23 +1444,23 @@ export default function TextileDashboard() {
                             <Button
                               size="icon"
                               variant="ghost"
-                              onClick={() => togglePasswordVisibility(employee.id)}
+                              onClick={() => togglePasswordVisibility(employee._id)}
                             >
-                              {showPasswords[employee.id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                              {showPasswords[employee._id] ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                             </Button>
                           </div>
                         </td>
                         <td className="p-2">
                           <Button size="sm" onClick={() => {
                             const newPassword = Math.random().toString(36).slice(-8);
-                            setUsers(users.map(u => u.id === employee.id ? { ...u, password: newPassword } : u));
+                            setUsers(users.map(u => u._id === employee._id ? { ...u, password: newPassword } : u));
                             toast.success("Contraseña actualizada")
                             toast.info(`Nueva contraseña para ${employee.username}: ${newPassword}`);
                           }}>
                             <RefreshCw className="h-4 w-4 mr-2" />
                             Nueva Contraseña
                           </Button>
-                          <Button size="sm" variant="destructive" onClick={() => handleEmployeeDelete(employee.id)} className="ml-2">
+                          <Button size="sm" variant="destructive" onClick={() => handleEmployeeDelete(employee._id)} className="ml-2">
                             <X className="h-4 w-4 mr-2" />
                             Eliminar
                           </Button>
