@@ -1,6 +1,7 @@
 import { Schema, model, Document } from 'mongoose';
 
 export interface IOrder extends Document {
+  _id: string;
   client: string;
   product: string;
   quantity: number;
