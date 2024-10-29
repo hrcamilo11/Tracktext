@@ -319,24 +319,7 @@ export default function TextileDashboard() {
 
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [activeSection, setActiveSection] = useState("pedidos")
-  const [orders, setOrders] = useState<Order[]>([
-    {
-      _id: ""+1,
-      client: "client",
-      product: "Vestidos",
-      quantity: 75,
-      status: "Completado",
-      dueDate: "2024-03-10",
-      progress: {
-        Cortado: { completed: 75 },
-        Bordado: { completed: 75 },
-        Cosido: { completed: 75 },
-        Armado: { completed: 75 },
-        'Control de calidad': { completed: 75 },
-        Empaquetado: { completed: 75 },
-      }
-    },
-  ])
+  const [orders, setOrders] = useState<Order[]>([])
   const [filteredOrders, setFilteredOrders] = useState(orders)
   const [searchTerm, setSearchTerm] = useState("")
   const [newClient, setNewClient] = useState<NewClient>({ username: '', password: '', email: '', phone: '' });
@@ -396,16 +379,16 @@ export default function TextileDashboard() {
     }
   }
 
-  const handlelistclients = async () => {
+  const handlelistUsers = async () => {
     // Valida el token antes de listar clientes
     const token = localStorage.getItem('authToken');
     if (token) {
-      const response = await fetch('http://localhost:5000/api/user/getByRole', {
+      const response = await fetch('http://localhost:5000/api/user/getAllUsers', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token, role: 'client' }),
+        body: JSON.stringify({ token}),
       });
 
       if (!response.ok) {
@@ -417,6 +400,35 @@ export default function TextileDashboard() {
 
       // Actualiza el estado con la lista de usuarios
       setUsers(data);
+    }
+  };
+  const handlelistOrders = async () => {
+    // Valida el token antes de listar órdenes
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      const response = await fetch('http://localhost:5000/api/order/getAll', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to fetch orders');
+      }
+  
+      // Convierte la respuesta a JSON
+      const data: Order[] = await response.json();
+  
+      // Filtra las órdenes entregadas y no entregadas
+      const delivered = data.filter(order => order.status === 'Entregado') as DeliveredOrder[];
+      const notDelivered = data.filter(order => order.status !== 'Entregado');
+  
+      // Actualiza el estado con la lista de órdenes
+      setOrders(notDelivered);
+      setFilteredOrders(notDelivered);
+      setDeliveredOrders(delivered);
     }
   };
 
@@ -440,7 +452,8 @@ export default function TextileDashboard() {
       setUser(data.user);
 
       setActiveSection("pedidos");
-      handlelistclients();
+      await handlelistUsers();
+      await handlelistOrders();
     }
   }
 
@@ -482,16 +495,37 @@ export default function TextileDashboard() {
     setSelectedOrder(order);
   };
 
-  const handleStatusUpdate = (orderId: string, newStatus: string) => {
+  const handleStatusUpdate = async (orderId: string, newStatus: string) => {
     const updatedOrders = orders.map(order =>
       order._id === orderId ? { ...order, status: newStatus } : order
-    )
-    setOrders(updatedOrders)
-    setFilteredOrders(updatedOrders)
-    if (selectedOrder && selectedOrder._id === orderId) {
-      setSelectedOrder({ ...selectedOrder, status: newStatus })
+    );
+
+    const updatedOrder = updatedOrders.find(order => order._id === orderId);
+
+    if (updatedOrder) {
+      try {
+        const response = await fetch('http://localhost:5000/api/order/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedOrder),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update order');
+        }
+
+        await handlelistOrders();
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('An unknown error occurred');
+        }
+      }
     }
-  }
+  };
 
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value.toLowerCase()
@@ -547,7 +581,7 @@ export default function TextileDashboard() {
     setNewClient({ username: "", password: "", email: "", phone: "" })
     toast.success("Cliente creado")
     toast.info("Se ha creado un nuevo cliente exitosamente.")
-    handlelistclients();
+    handlelistUsers();
     
   }
 
@@ -582,10 +616,11 @@ export default function TextileDashboard() {
       toast.error("error al crear empleado");
     }
 
-    setUsers([...users, newEmployeeUser])
+    
     setNewEmployee({ username: "", password: "", email: "", phone: "" })
     toast.success("Empleado creado")
     toast.info("Se ha creado un nuevo empleado exitosamente.")
+    handlelistUsers();
   }
 
   const handleEmployeeDelete = (employeeId: string) => {
@@ -615,7 +650,7 @@ export default function TextileDashboard() {
     });
   };
 
-  const handleNewOrderSubmit = () => {
+  const handleNewOrderSubmit =  async () => {
     const today = new Date();
     const dueDate = new Date(newOrder.dueDate);
 
@@ -628,7 +663,7 @@ export default function TextileDashboard() {
     const newId = orders.length + 1;
     const newOrderWithId: Order = {
       _id: "" + newId,
-      client: user?.role === 'client' ? user.username : '',
+      client: user?.role === 'client' ? user.username : 'sin_asignar',
       product: newOrder.product,
       quantity: parseInt(newOrder.quantity),
       dueDate: newOrder.dueDate,
@@ -640,8 +675,20 @@ export default function TextileDashboard() {
           .map(([key]) => [key, { completed: 0 }])
       ),
     };
-    setOrders([...orders, newOrderWithId]);
-    setFilteredOrders([...orders, newOrderWithId]);
+    const response = await fetch('http://localhost:5000/api/order/create', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ client: newOrderWithId.client, product: newOrderWithId.product, quantity: newOrderWithId.quantity, dueDate: newOrderWithId.dueDate, status: newOrderWithId.status,progress:newOrderWithId.progress }),
+    });
+
+    if (!response.ok) {
+      toast.error("error al crear orden");
+    }
+    
+    
+    await handlelistOrders();
     setNewOrder({
       product: "",
       quantity: "",
@@ -652,7 +699,7 @@ export default function TextileDashboard() {
     toast.info("Se ha creado un nuevo pedido exitosamente.");
   };
 
-  const handleSubtaskUpdate = (orderId: string, subtask: string, completed: string) => {
+  const handleSubtaskUpdate = async (orderId: string, subtask: string, completed: string) => {
     const updatedOrders = orders.map(order => {
       if (order._id === orderId && order.progress[subtask]) {
         return {
@@ -667,24 +714,64 @@ export default function TextileDashboard() {
       }
       return order;
     });
-    setOrders(updatedOrders);
-    setFilteredOrders(updatedOrders);
-    if (selectedOrder && selectedOrder._id === orderId) {
-      setSelectedOrder(updatedOrders.find(order => order._id === orderId) || null);
+
+    const updatedOrder = updatedOrders.find(order => order._id === orderId);
+
+    if (updatedOrder) {
+      try {
+        const response = await fetch('http://localhost:5000/api/order/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedOrder),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update order');
+        }
+
+        await handlelistOrders();
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('An unknown error occurred');
+        }
+      }
     }
   };
 
-  const handleMarkAsDelivered = (orderId: string) => {
+  const handleMarkAsDelivered = async (orderId: string) => {
     const orderToDeliver = orders.find(order => order._id === orderId)
     if (orderToDeliver) {
       const updatedOrder: DeliveredOrder = { ...orderToDeliver, status: "Entregado", deliveredDate: new Date().toISOString() }
       setDeliveredOrders([...deliveredOrders, updatedOrder])
       const updatedOrders = orders.filter(order => order._id !== orderId)
-      setOrders(updatedOrders)
-      setFilteredOrders(updatedOrders)
+      
 
-      toast.success("Pedido entregado")
-      toast.info(`El pedido #${orderId} ha sido marcado como entregado.`)
+      try {
+        const response = await fetch('http://localhost:5000/api/order/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedOrder),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update order');
+        }
+        await handlelistOrders();
+        toast.success("Pedido entregado")
+        toast.info(`El pedido #${orderId} ha sido marcado como entregado.`)
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('An unknown error occurred');
+        }
+      }
     }
   }
 
@@ -692,15 +779,39 @@ export default function TextileDashboard() {
     setShowPasswords(prev => ({ ...prev, [id]: !prev[id] }))
   }
 
-  const handleAssignOrder = (clientId: string, orderId: string) => {
+  const handleAssignOrder = async (clientId: string, orderId: string) => {
     const updatedOrders = orders.map(order =>
       order._id === orderId ? { ...order, client: users.find(u => u._id === clientId)?.username || '' } : order
-    )
-    setOrders(updatedOrders)
-    setFilteredOrders(updatedOrders)
-    toast.success("Pedido asignado")
-    toast.info(`El pedido #${orderId} ha sido asignado exitosamente.`)
-  }
+    );
+
+    const updatedOrder = updatedOrders.find(order => order._id === orderId);
+
+    if (updatedOrder) {
+      try {
+        const response = await fetch('http://localhost:5000/api/order/update', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedOrder),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update order');
+        }
+
+        await handlelistOrders();
+        toast.success("Pedido asignado");
+        toast.info(`El pedido #${orderId} ha sido asignado exitosamente.`);
+      } catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('An unknown error occurred');
+        }
+      }
+    }
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString)
@@ -1093,7 +1204,7 @@ export default function TextileDashboard() {
                                   <SelectValue placeholder="Seleccione un pedido" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                  {orders.filter(order => !order.client).map((order) => (
+                                  {orders.filter(order => order.client=== 'sin_asignar').map((order) => (
                                     <SelectItem key={order._id} value={order._id.toString()}>
                                       Pedido #{order._id} - {order.product}
                                     </SelectItem>

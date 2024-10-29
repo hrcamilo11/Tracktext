@@ -6,6 +6,7 @@ export interface IOrder extends Document {
   product: string;
   quantity: number;
   dueDate: string;
+  deliveredDate: string;
   status: string;
   progress: { [key: string]: { completed: number } };
 }
@@ -15,13 +16,14 @@ const OrderSchema = new Schema<IOrder>({
   product: { type: String, required: true },
   quantity: { type: Number, required: true },
   dueDate: { type: String, required: true },
+  deliveredDate: { type: String, required: false },
   status: { type: String, required: true },
   progress: { 
     type: Map, 
     of: new Schema({
       completed: { type: Number, required: true }
     }), 
-    required: true 
+    required: false 
   },
 });
 

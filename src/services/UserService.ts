@@ -24,15 +24,23 @@ export class UserService {
 
     }
 
+
+
     async getUserByUsername(username: string) {
         const user = await this.userRepository.findByUsername(username);
         if (!user) {
             throw new Error('Usuario no encontrado');
         }
     }
-
+    async getAllUsers() {
+        try {
+            return await this.userRepository.getAll();
+        } catch (error) {
+            throw new Error('Error al obtener los usuarios');
+        }
+    }
     async createUser(user: any) {
-        
+
         const existingUserByUsername = await this.userRepository.findByUsername(user.username);
         if (existingUserByUsername) {
             throw new Error('El nombre de usuario ya está en uso');
