@@ -2,5 +2,33 @@
   "extends": [
     "next/core-web-vitals",
     "next/typescript"
-  ]
+  ],
+  "rules": {
+    "react/no-unescaped-entities": "warn",
+    "react/no-unused-state": "warn",
+    "react/jsx-no-useless-fragment": "warn",
+    "react/self-closing-comp": "warn",
+    "react/jsx-curly-brace-presence": ["warn", { "props": "never", "children": "never" }],
+    "@next/next/no-img-element": "warn",
+    "@next/next/no-html-link-for-pages": "error",
+    "jsx-a11y/alt-text": "warn",
+    "jsx-a11y/aria-props": "warn",
+    "jsx-a11y/aria-proptypes": "warn",
+    "jsx-a11y/aria-unsupported-elements": "warn",
+    "jsx-a11y/role-has-required-aria-props": "warn",
+    "no-console": "warn",
+    "no-unused-vars": "warn",
+    "no-undef": "error",
+    "semi": ["error", "always"],
+    "quotes": ["warn", "single"],
+    "eqeqeq": "warn",
+    "prettier/prettier": ["error", { "singleQuote": true }],
+    "react/jsx-filename-extension": [1, { "extensions": [".js", ".jsx"] }],
+    "react/prop-types": "off",
+    "react/display-name": "off",
+    "react/state-in-constructor": "off",
+    "react/static-property-placement": "off",
+    "react/sort-comp": "off",
+    "react/no-array-index-key": "off"
+  }
 }

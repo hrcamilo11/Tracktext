@@ -1,6 +1,6 @@
-import { IOrderRepository } from "../interfaces/IOrderRepository.ts";
-import { IOrder, Order } from "../models/Order.ts"; // Adjust the import path as necessary
-import { IUserRepository } from "../interfaces/IUserRepository.ts";
+import { IOrderRepository } from "../interfaces/IOrderRepository";
+import { IOrder, Order } from "../models/Order"; // Adjust the import path as necessary
+import { IUserRepository } from "../interfaces/IUserRepository";
 import { log } from "console";
 
 export class OrderService {

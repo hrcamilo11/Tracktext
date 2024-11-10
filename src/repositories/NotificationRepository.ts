@@ -1,5 +1,5 @@
-import { INotificationRepository } from '../interfaces/INotificationRepository.ts';
-import { Notification, INotification } from '../models/Notification.ts';
+import { INotificationRepository } from '../interfaces/INotificationRepository';
+import { Notification, INotification } from '../models/Notification';
 
 export class NotificationRepository implements INotificationRepository {
   async getAll(): Promise<INotification[]> {

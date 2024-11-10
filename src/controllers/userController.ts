@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { UserService } from '../services/UserService.ts';
-import { UserRepository } from '../repositories/User_repository.ts';
-import { validateToken } from './authController.ts';
-import { AuthRepository } from '../repositories/AuthRepository.ts';
-import { AuthService } from '../services/AuthService.ts';
+import { UserService } from '../services/UserService';
+import { UserRepository } from '../repositories/User_repository';
+import { validateToken } from './authController';
+import { AuthRepository } from '../repositories/AuthRepository';
+import { AuthService } from '../services/AuthService';
 
 const authRepository = new AuthRepository();
 const authService = new AuthService(authRepository);

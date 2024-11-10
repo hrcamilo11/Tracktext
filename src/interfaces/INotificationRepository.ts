@@ -1,4 +1,4 @@
-import { INotification } from '../models/Notification.ts';
+import { INotification } from '../models/Notification';
 
 export interface INotificationRepository {
   getAll(): Promise<INotification[]>;

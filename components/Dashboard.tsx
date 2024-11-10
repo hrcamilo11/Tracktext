@@ -1,12 +1,12 @@
 "use client"
 
 import React, { useState, useEffect } from "react"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Badge } from './ui/badge'
+import { Button } from "./ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/card"
+import { Input } from "./ui/input"
+import { Label } from "./ui/label"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
 import jwtDecode from 'jwt-decode';
 
 
@@ -33,10 +33,10 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Progress } from "@/components/ui/progress"
+} from "./ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { Checkbox } from "./ui/checkbox"
+import { Progress } from "./ui/progress"
 import { toast } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 

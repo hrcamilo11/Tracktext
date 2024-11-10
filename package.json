@@ -4,11 +4,12 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "concurrently \"npm run dev:next\" \"npm run dev:express\"",
+    "dev": "npm-run-all build:express dev:express dev:next",
+    "build:express": "webpack --config webpack.config.cjs",
+    "dev:express": "node dist/bundle.cjs",
     "dev:next": "next dev",
-    "dev:express": "ts-node-esm ./server.ts",
-    "build": "next build",
-    "start": "next start",
+    "build:next": "next build",
+    "start:next": "next start",
     "lint": "next lint"
   },
   "dependencies": {
@@ -61,11 +62,15 @@
     "concurrently": "^9.0.1",
     "eslint": "^8",
     "eslint-config-next": "14.2.13",
+    "npm-run-all": "^4.1.5",
     "postcss": "^8",
     "tailwindcss": "^3.4.1",
     "ts-loader": "^9.5.1",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
-    "typescript": "^5.6.3"
+    "typescript": "^5.6.3",
+    "webpack": "^5.96.1",
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
   }
 }
