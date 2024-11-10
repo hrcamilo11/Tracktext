@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import { OrderService } from "../services/OrderService.ts";
-import { OrderRepository } from "../repositories/OrderRepository.ts";
-import { UserRepository } from "../repositories/User_repository.ts";
-import { AuthService } from "../services/AuthService.ts";
-import { AuthRepository } from "../repositories/AuthRepository.ts";
+import { OrderService } from "../services/OrderService";
+import { OrderRepository } from "../repositories/OrderRepository";
+import { UserRepository } from "../repositories/User_repository";
+import { AuthService } from "../services/AuthService";
+import { AuthRepository } from "../repositories/AuthRepository";
 import { User } from 'lucide-react';
 
 const authRepository = new AuthRepository();

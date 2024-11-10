@@ -1,6 +1,6 @@
-import { IUserRepository } from '../interfaces/IUserRepository.ts';
-import { User, IUser } from '../models/User.ts';
-import { Document, Types } from 'mongoose';
+import { IUserRepository } from '../interfaces/IUserRepository';
+import { User, IUser } from '../models/User';
+
 
 export class UserRepository implements IUserRepository {
 

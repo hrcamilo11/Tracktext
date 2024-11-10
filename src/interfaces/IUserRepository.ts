@@ -1,4 +1,4 @@
-import { IUser } from '../models/User.ts';
+import { IUser } from '../models/User';
 
 export interface IUserRepository {
     getAll(): Promise<IUser[]>;

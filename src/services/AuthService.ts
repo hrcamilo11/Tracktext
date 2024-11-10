@@ -1,5 +1,5 @@
-import { IAuthRepository } from '../interfaces/IAuthRepository.ts';
-import { IUser, User } from '../models/User.ts';
+import { IAuthRepository } from '../interfaces/IAuthRepository';
+import { IUser, User } from '../models/User';
 import bcrypt from 'bcryptjs';
 
 import jwt from 'jsonwebtoken';
@@ -60,6 +60,7 @@ export class AuthService {
         throw new Error('Usuario no encontrado');
       }
       return user;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (error) {
       throw new Error('Token inválido');
   }
