@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "./ui/
 import { Input } from "./ui/input"
 import { Label } from "./ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs"
-import jwtDecode from 'jwt-decode';
+
 
 
 import {
@@ -623,16 +623,65 @@ export default function TextileDashboard() {
     handlelistUsers();
   }
 
-  const handleEmployeeDelete = (employeeId: string) => {
-    setUsers(users.filter(user => user._id !== employeeId || user.role !== "employee"))
-    toast.warning("Empleado eliminado")
-    toast.info("Se ha eliminado el empleado exitosamente.")
+  const handleEmployeeDelete = async (employeeId: string) => {
+    try {
+      const user= users.find(user => user._id === employeeId)
+
+      const response = await fetch('http://localhost:5000/api/user/deleteUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({_id: user?._id}),
+      });
+
+      if (!response.ok) {
+        toast.error('Failed to delete user');
+        throw new Error('Failed to delete user');
+      }
+    handlelistUsers();  
+    toast.warning("empleado eliminado")
+    toast.info("Se ha eliminado el elmpleado exitosamente.")
+    }
+
+      catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('An unknown error occurred');
+        }
+      }
+    
   }
 
-  const handleClientDelete = (clientId: string) => {
-    setUsers(users.filter(user => user._id !== clientId || user.role !== "client"))
+  const handleClientDelete = async (clientId: string) => {
+    try {
+      const user= users.find(user => user._id === clientId)
+
+      const response = await fetch('http://localhost:5000/api/user/deleteUser', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({_id: user?._id}),
+      });
+
+      if (!response.ok) {
+        toast.error('Failed to delete user');
+        throw new Error('Failed to delete user');
+      }
+    handlelistUsers();  
     toast.warning("Cliente eliminado")
     toast.info("Se ha eliminado el cliente exitosamente.")
+    }
+
+      catch (error) {
+        if (error instanceof Error) {
+          toast.error(error.message);
+        } else {
+          toast.error('An unknown error occurred');
+        }
+      }
   }
 
   const handleNewOrderChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -8,7 +8,7 @@ router.post('/getByID', getUserById);
 router.post('/getByName', getUserByUsername);
 router.post('/getByRole', getUsersByRole);
 router.put('/updateUser', updateUser);
-router.delete('/deleteUser', deleteUser);
+router.post('/deleteUser', deleteUser);
 router.post('/getAllUsers', getAllUsers);
 
 
