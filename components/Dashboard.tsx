@@ -1393,6 +1393,7 @@ export default function TextileDashboard() {
                                                 id="quantity"
                                                 name="quantity"
                                                 type="number"
+                                                min={1}
                                                 value={newOrder.quantity}
                                                 onChange={handleNewOrderChange}
                                                 required
@@ -1486,9 +1487,9 @@ export default function TextileDashboard() {
                                                         className="grid grid-cols-2 gap-4 py-4 max-h-[60vh] overflow-y-auto">
                                                         {Object.entries(order.progress).reduce((acc, [subtask, {completed}], index) => {
                                                             if (index % 20 < 5) {
-                                                                acc[0].push(subtask, {completed});
+                                                                acc[0].push({subtask, completed});
                                                             } else {
-                                                                acc[1].push(subtask, {completed});
+                                                                acc[1].push({subtask, completed});
                                                             }
                                                             return acc;
                                                         }, [[], []]).map((column, colIndex) => <div
