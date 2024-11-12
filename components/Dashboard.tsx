@@ -47,7 +47,7 @@ type User = {
     username: string
     password: string
     email: string
-    phone: string
+    phone: number
     role: 'admin' | 'employee' | 'client'
 }
 
@@ -61,7 +61,7 @@ type Notification = {
 
 type AuthProps = {
     onLogin: (user: User) => void
-    onRegister: (username: string, password: string, email: string, phone: string) => void
+    onRegister: (username: string, password: string, email: string, phone:number) => void
     onPasswordRecovery: (username: string) => void
     users: User[]
 }
@@ -86,7 +86,7 @@ interface NewOrder {
     product: string;
     size: string;
     reference: number;
-    quantity: string;
+    quantity: number;
     dueDate: string;
     subtasks: {
         [key: string]: boolean;
@@ -106,14 +106,14 @@ interface NewClient {
     username: string;
     password: string;
     email: string;
-    phone: string;
+    phone: number;
 }
 
 interface NewEmployee {
     username: string;
     password: string;
     email: string;
-    phone: string;
+    phone: number;
 }
 
 const subtasks: Subtask[] = [
@@ -381,13 +381,13 @@ export default function TextileDashboard() {
     const [orders, setOrders] = useState<Order[]>([]);
     const [filteredOrders, setFilteredOrders] = useState(orders);
     const [searchTerm, setSearchTerm] = useState('');
-    const [newClient, setNewClient] = useState<NewClient>({username: '', password: '', email: '', phone: ''});
-    const [newEmployee, setNewEmployee] = useState<NewEmployee>({username: '', password: '', email: '', phone: ''});
+    const [newClient, setNewClient] = useState<NewClient>({username: '', password: '', email: '', phone: 0});
+    const [newEmployee, setNewEmployee] = useState<NewEmployee>({username: '', password: '', email: '', phone: 0 });
     const [newOrder, setNewOrder] = useState<NewOrder>({
         product: '',
         size: '',
         reference: 0,
-        quantity: '',
+        quantity: 0,
         dueDate: '',
         subtasks: {},
     });
@@ -504,7 +504,45 @@ export default function TextileDashboard() {
         }
     };
 
-    const handleRegister = (username: string, password: string, email: string, phone: string) => {
+    const handleNewPassword = async (userId: string) => {
+      try {
+        const user= users.find(user => user._id === userId);
+
+        const newPassword = Math.random().toString(36).slice(-8);
+
+        const response = await fetch(`http://localhost:5000/api/user/updateUser/${user?._id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            password: newPassword,
+          }),
+        });
+  
+        if (!response.ok) {
+          toast.error('Failed to delete user');
+          throw new Error('Failed to delete user');
+        }
+      handlelistUsers();  
+      toast.success('Contraseña actualizada');
+      toast.info(`Nueva contraseña para ${user?.username}: ${newPassword}`);
+      }
+  
+        catch (error) {
+          if (error instanceof Error) {
+            toast.error(error.message);
+          } else {
+            toast.error('An unknown error occurred');
+          }
+        }
+      
+      
+
+      
+    }; 
+
+    const handleRegister = (username: string, password: string, email: string, phone: number) => {
         const newUser: User = {
             _id: '' + users.length + 1,
             username,
@@ -519,6 +557,7 @@ export default function TextileDashboard() {
     };
 
     const handlePasswordRecovery = (username: string) => {
+      
         const user = users.find(u => u.username === username);
         if (user) {
             createNotification('password_change', `El usuario ${username} ha solicitado un cambio de  contraseña.`);
@@ -599,7 +638,7 @@ export default function TextileDashboard() {
             toast.error('error al crear empleado');
         }
 
-        setNewClient({username: '', password: '', email: '', phone: ''});
+        setNewClient({username: '', password: '', email: '', phone: 0});
         toast.success('Cliente creado');
         toast.info('Se ha creado un nuevo cliente exitosamente.');
         handlelistUsers();
@@ -644,7 +683,7 @@ export default function TextileDashboard() {
         }
 
 
-        setNewEmployee({username: '', password: '', email: '', phone: ''});
+        setNewEmployee({username: '', password: '', email: '', phone: 0});
         toast.success('Empleado creado');
         toast.info('Se ha creado un nuevo empleado exitosamente.');
         handlelistUsers();
@@ -850,7 +889,7 @@ export default function TextileDashboard() {
             product: newOrder.product,
             size: newOrder.size,
             reference: newOrder.reference,
-            quantity: parseInt(newOrder.quantity),
+            quantity: newOrder.quantity,
             dueDate: newOrder.dueDate,
             status: 'Pendiente',
             progress: Object.fromEntries(
@@ -878,7 +917,7 @@ export default function TextileDashboard() {
                 product: '',
                 size: '',
                 reference: 0,
-                quantity: '',
+                quantity: 0,
                 dueDate: '',
                 subtasks: {},
             });
@@ -1320,13 +1359,7 @@ export default function TextileDashboard() {
                                             </td>
                                             <td className="p-2">
                                                 <Button size="sm" onClick={() => {
-                                                    const newPassword = Math.random().toString(36).slice(-8);
-                                                    setUsers(users.map(u => u._id === client._id ? {
-                                                        ...u,
-                                                        password: newPassword
-                                                    } : u));
-                                                    toast.success('Contraseña actualizada');
-                                                    toast.info(`Nueva contraseña para ${client.username}: ${newPassword}`);
+                                                  handleNewPassword(client._id)
                                                 }}>
                                                     <RefreshCw className="h-4 w-4 mr-2"/>
                                                     Nueva Contraseña
@@ -1771,13 +1804,7 @@ export default function TextileDashboard() {
                                             </td>
                                             <td className="p-2">
                                                 <Button size="sm" onClick={() => {
-                                                    const newPassword = Math.random().toString(36).slice(-8);
-                                                    setUsers(users.map(u => u._id === employee._id ? {
-                                                        ...u,
-                                                        password: newPassword
-                                                    } : u));
-                                                    toast.success('Contraseña actualizada');
-                                                    toast.info(`Nueva contraseña para ${employee.username}: ${newPassword}`);
+                                                   handleNewPassword(employee._id)
                                                 }}>
                                                     <RefreshCw className="h-4 w-4 mr-2"/>
                                                     Nueva Contraseña

@@ -1,4 +1,5 @@
 import { IUserRepository } from "../interfaces/IUserRepository";
+import Crypto from 'crypto-js';
 
 export class UserService {
     private userRepository: IUserRepository;
@@ -34,7 +35,15 @@ export class UserService {
     }
     async getAllUsers() {
         try {
-            return await this.userRepository.getAll();
+            const users = await this.userRepository.getAll();
+            users.forEach(user => {
+                if (user.password) {
+                    const bytes = Crypto.AES.decrypt(user.password, 'clavecita');
+                    user.password = bytes.toString(Crypto.enc.Utf8);
+                }
+            });
+            console.log(users);
+            return users;
         } catch (error) {
             throw new Error('Error al obtener los usuarios');
         }
@@ -61,11 +70,15 @@ export class UserService {
         return await this.userRepository.delete(id);
     }
 
-    async updateUser(id: string, user: any) {
+    async updateUser(id: string, password:string ) {
         const existingUser = await this.userRepository.findById(id);
         if (!existingUser) {
             throw new Error('Usuario no encontrado');
+            
         }
+        const user= existingUser
+        user.password = Crypto.AES.encrypt(password, 'clavecita').toString();
+
         return await this.userRepository.update(id, user);
     }
 }

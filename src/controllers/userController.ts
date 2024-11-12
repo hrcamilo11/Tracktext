@@ -69,8 +69,8 @@ export const createUser = async (req: Request, res: Response) => {
 
 export const updateUser = async (req: Request, res: Response) => {
     try {
-        const userId = req.params.id;
-        const userData = req.body;
+        const userId = req.params._id;
+        const userData = req.body.password;
         const updatedUser = await userService.updateUser(userId, userData);
         res.status(200).json(updatedUser);
     } catch (error) {
