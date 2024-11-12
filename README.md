@@ -131,7 +131,7 @@ textil-dashboard/
 ## Uso
 
 1. Inicia sesión con las credenciales predeterminadas:
-   - Admin: usuario `admin`, contraseña `admin`
+   - Admin: usuario `superadmin`, contraseña `superadmin`
    - Empleado: usuario `employee`, contraseña `employee`
    - Cliente: usuario `client`, contraseña `client`
 
