@@ -80,8 +80,9 @@ export const updateUser = async (req: Request, res: Response) => {
 
 export const deleteUser = async (req: Request, res: Response) => {
     try {
-        console.log(req.body);
-        const userId = req.body._id;
+        
+        const userId = req.params._id;
+        console.log(userId);
         await userService.deleteUser(userId);
         res.status(204).send();
     } catch (error) {
