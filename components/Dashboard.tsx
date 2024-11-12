@@ -84,7 +84,7 @@ interface Order {
 interface NewOrder {
     product: string;
     size: string;
-    reference: string;
+    reference: number;
     quantity: string;
     dueDate: string;
     subtasks: {
@@ -385,7 +385,7 @@ export default function TextileDashboard() {
     const [newOrder, setNewOrder] = useState<NewOrder>({
         product: '',
         size: '',
-        reference: '',
+        reference: 0,
         quantity: '',
         dueDate: '',
         subtasks: {},
@@ -830,7 +830,7 @@ export default function TextileDashboard() {
             setNewOrder({
                 product: '',
                 size: '',
-                reference: '',
+                reference: 0,
                 quantity: '',
                 dueDate: '',
                 subtasks: {},
@@ -1139,16 +1139,16 @@ export default function TextileDashboard() {
                                             <div>
                                                 <Label>Progreso del Pedido</Label>
                                                 <div className="space-y-2 mt-2">
-                                                    {subtasks.map((subtask) => (
+                                                    {Object.entries(selectedOrder.progress).map(([subtask, progress]) => (
                                                         <div key={subtask} className="space-y-1">
                                                             <div className="flex justify-between items-center">
                                                                 <span className="text-sm font-medium">{subtask}</span>
                                                                 <span className="text-sm text-muted-foreground">
-                                  {selectedOrder.progress[subtask]?.completed || 0} / {selectedOrder.quantity}
-                                </span>
+                        {progress.completed} / {selectedOrder.quantity}
+                      </span>
                                                             </div>
                                                             <Progress
-                                                                value={((selectedOrder.progress[subtask]?.completed || 0) / selectedOrder.quantity) * 100}
+                                                                value={(progress.completed / selectedOrder.quantity) * 100}
                                                                 className="h-2"
                                                             />
                                                         </div>
@@ -1380,6 +1380,7 @@ export default function TextileDashboard() {
                                             <Input
                                                 id="reference"
                                                 name="reference"
+                                                type="number"
                                                 value={newOrder.reference}
                                                 onChange={handleNewOrderChange}
                                                 required
@@ -1457,32 +1458,42 @@ export default function TextileDashboard() {
                                     </tr>
                                     </thead>
                                     <tbody>
-                                    {orders.map((order) => (
-                                        <tr key={order._id} className="hover:bg-gray-100">
-                                            <td className="p-2">{order._id}</td>
-                                            <td className="p-2">{order.client || 'Sin asignar'}</td>
-                                            <td className="p-2">{order.product}</td>
-                                            <td className="p-2">{order.size}</td>
-                                            <td className="p-2">{order.reference}</td>
-                                            <td className="p-2">{order.quantity}</td>
-                                            <td className="p-2">{formatDate(order.dueDate)}</td>
-                                            <td className="p-2">
-                                                <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
-                                            </td>
-                                            <td className="p-2">
-                                                <Dialog>
-                                                    <DialogTrigger asChild>
-                                                        <Button variant="outline" size="sm">Actualizar Progreso</Button>
-                                                    </DialogTrigger>
-                                                    <DialogContent className="sm:max-w-[425px]">
-                                                        <DialogHeader>
-                                                            <DialogTitle>Progreso del Pedido #{order._id}</DialogTitle>
-                                                            <DialogDescription>
-                                                                Actualice el progreso de cada subtarea
-                                                            </DialogDescription>
-                                                        </DialogHeader>
-                                                        <div className="grid gap-4 py-4">
-                                                            {Object.entries(order.progress).map(([subtask, {completed}]) => (
+                                    {orders.map((order) => <tr key={order._id} className="hover:bg-gray-100">
+                                        <td className="p-2">{order._id}</td>
+                                        <td className="p-2">{order.client || 'Sin asignar'}</td>
+                                        <td className="p-2">{order.product}</td>
+                                        <td className="p-2">{order.size}</td>
+                                        <td className="p-2">{order.reference}</td>
+                                        <td className="p-2">{order.quantity}</td>
+                                        <td className="p-2">{formatDate(order.dueDate)}</td>
+                                        <td className="p-2">
+                                            <Badge className={getStatusColor(order.status)}>{order.status}</Badge>
+                                        </td>
+                                        <td className="p-2">
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button variant="outline" size="sm">Actualizar Progreso</Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="sm:max-w-[700px]">
+                                                    <DialogHeader>
+                                                        <DialogTitle>Progreso del Pedido #{order._id}</DialogTitle>
+                                                        <DialogDescription>
+                                                            Actualice el progreso de cada subtarea
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <div
+                                                        className="grid grid-cols-2 gap-4 py-4 max-h-[60vh] overflow-y-auto">
+                                                        {Object.entries(order.progress).reduce((acc, [subtask, {completed}], index) => {
+                                                            if (index % 20 < 5) {
+                                                                acc[0].push(subtask, {completed});
+                                                            } else {
+                                                                acc[1].push(subtask, {completed});
+                                                            }
+                                                            return acc;
+                                                        }, [[], []]).map((column, colIndex) => <div
+                                                            key={colIndex}
+                                                            className="space-y-4">
+                                                            {column.map(({subtask, completed}) => (
                                                                 <div key={subtask}
                                                                      className="grid grid-cols-4 items-center gap-4">
                                                                     <Label htmlFor={`${order._id}-${subtask}`}
@@ -1500,27 +1511,24 @@ export default function TextileDashboard() {
                                                                     />
                                                                 </div>
                                                             ))}
-                                                        </div>
-                                                        <DialogFooter>
-                                                            <Button type="submit">Guardar Cambios</Button>
-                                                        </DialogFooter>
-                                                    </DialogContent>
-                                                </Dialog>
-                                            </td>
-                                            <td className="p-2">
-                                                <Select onValueChange={(value) => handleStatusUpdate(order._id, value)}>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Cambiar estado"/>
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        <SelectItem value="Pendiente">Pendiente</SelectItem>
-                                                        <SelectItem value="En producción">En producción</SelectItem>
-                                                        <SelectItem value="Completado">Completado</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                            </td>
-                                        </tr>
-                                    ))}
+                                                        </div>)}
+                                                    </div>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </td>
+                                        <td className="p-2">
+                                            <Select onValueChange={(value) => handleStatusUpdate(order._id, value)}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Cambiar estado"/>
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Pendiente">Pendiente</SelectItem>
+                                                    <SelectItem value="En producción">En producción</SelectItem>
+                                                    <SelectItem value="Completado">Completado</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        </td>
+                                    </tr>)}
                                     </tbody>
                                 </table>
                             </CardContent>

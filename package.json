@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "npm-run-all build:express dev:express dev:next",
+    "dev": "concurrently \"npm run dev:express\" \"npm run dev:next\"",
     "build:express": "webpack --config webpack.config.cjs",
     "dev:express": "node dist/bundle.cjs",
     "dev:next": "next dev",
